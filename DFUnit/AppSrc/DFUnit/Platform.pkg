@@ -1,0 +1,26 @@
+﻿Use UI
+#IFDEF DFUNIT_FLEXSCRIPT
+Use FlexScript.pkg
+#ELSE
+Use VDFBase.pkg
+
+#IFNDEF C_RuntimePlaformId_Unknown
+Enum_List
+    Define C_RuntimePlaformId_Unknown for 0
+    Define C_RuntimePlaformId_Windows
+    Define C_RuntimePlaformId_MacOS
+    Define C_RuntimePlaformId_Linux
+    Define C_RuntimePlaformId_Unix
+    Define C_RuntimePlaformId_WASM
+    Define C_RuntimePlaformId_WASI
+End_Enum_List
+
+Function RuntimePlatformId Global Returns Integer
+    Function_Return C_RuntimePlaformId_Windows
+End_Function
+
+Function RuntimePlatformIsWeb Global Returns Boolean
+    Function_Return False
+End_Function
+#ENDIF
+#ENDIF

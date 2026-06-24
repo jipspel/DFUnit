@@ -1,4 +1,4 @@
-Use VDFBase.pkg
+﻿Use DFUnit\Platform.pkg
 
 Class cDFUnitFixtureRunner_Mixin is a Mixin
     

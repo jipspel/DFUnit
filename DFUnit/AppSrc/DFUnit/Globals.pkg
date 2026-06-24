@@ -1,3 +1,5 @@
+﻿Use DFUnit\Platform.pkg
+
 Global_Variable Handle ghoTestApplication
 Move 0 to ghoTestApplication
 

@@ -1,3 +1,6 @@
-Use DFUnit\Reporting\Reporters\UIListReporter.pkg
+﻿Use DFUnit\Reporting\Reporters\ConsoleReporter.pkg
 Use DFUnit\Reporting\Reporters\XMLReporter.pkg
-Use DFUnit\Reporting\Reporters\ConsoleReporter.pkg
+#IFDEF DFUNIT_FLEXSCRIPT
+#ELSE
+Use DFUnit\Reporting\Reporters\UIListReporter.pkg
+#ENDIF

@@ -1,6 +1,6 @@
-Use DFUnit\Reporting\LineBasedReporting.pkg
+﻿Use DFUnit\Reporting\LineBasedReporting.pkg
 
-Use DFUnit\Utils\Console.pkg
+Use DFUnit\Console.pkg
 
 Class cDFUnitConsoleReporter is a IReporter_Mixin
     
@@ -34,7 +34,7 @@ Class cDFUnitConsoleReporter is a IReporter_Mixin
     Procedure Line
         If (pbNewLine(Self) = False) ;
             Send PrintLn ""
-        Send DFUnit_ConsoleWriteLn (psLine(Self))
+        Send DFUnit_ConsoleWriteLn C_DFUNIT_LINEBASED_LINE
     End_Procedure
 
 End_Class

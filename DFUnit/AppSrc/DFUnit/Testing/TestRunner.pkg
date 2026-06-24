@@ -1,6 +1,4 @@
-﻿Use VDFBase.pkg
-
-Use DFUnit\Testing\Test.pkg
+﻿Use DFUnit\Testing\Test.pkg
 Use DFUnit\Fixturing\Fixture.pkg
 Use DFUnit\Reporting\ReporterManager.pkg
 Use DFUnit\Results\StatisticsCollector.pkg
@@ -25,13 +23,13 @@ Class cDFUnitTestRunner_Mixin is a Mixin
         
         { Visibility=Private }
         Property Handle phCurrentTest 0
-        
-        Send AttachToTrackerEvents of ghoErrorTracker Self
     End_Procedure 
     
     { Visibility=Private }
     Procedure RunTestInFixture Handle hFixture Handle hTest
         Set phCurrentTest to hTest
+        
+        Send AttachToTrackerEvents of ghoErrorTracker Self
         
         Send IncreaseTotalTests
         Send Reporters_StartTest Self
@@ -75,6 +73,8 @@ Class cDFUnitTestRunner_Mixin is a Mixin
         Set pulAssertsFailed to (pulAssertsFailed(Self) + pulCurrentTest_AssertsFailed(Self))
         Set pulAssertsSucceeded to (pulAssertsSucceeded(Self) + pulCurrentTest_AssertsSucceeded(Self))
         Set pulErrors to (pulErrors(Self) + pulCurrentTest_Errors(Self))
+        
+        Send DetachFromTrackerEvents of ghoErrorTracker Self
         
         Send ClearCurrentTestStatistics
         Send SaveErrorStackToTotal of ghoErrorTracker
@@ -177,6 +177,11 @@ Class cDFUnitTestRunner_Mixin is a Mixin
     
     { Visibility=Private }
     Procedure Tracker_ExpectedError_Occured tDFUnitErrorInfo oError
+    End_Procedure
+    
+    { Visibility=Private }
+    Procedure Tracker_ExpectedError_Did_Not_Occur tDFUnitErrorInfo oError
+        Send Assert False ("An expected error did not occur. Error Number: " + String(oError.iErrorCode)) (SFormat("An expected error did not occur. Error Number: %1", oError.iErrorCode))
     End_Procedure
     
     { Visibility=Private }

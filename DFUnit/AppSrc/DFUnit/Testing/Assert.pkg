@@ -1,7 +1,4 @@
-Use VdfBase.pkg
-Use Winkern.pkg
-
-Use DFUnit\Globals.pkg
+﻿Use DFUnit\Globals.pkg
 Use DFUnit\Utils\Debugger.pkg
 Use DFUnit\Utils\Objects.pkg
 Use DFUnit\CallRecording.pkg
@@ -9,7 +6,7 @@ Use DFUnit\CallRecording.pkg
 Class cDFUnitAssert_Mixin is a Mixin
     
     Procedure Assert Boolean bCondition String sOptAssertMessage
-        If bCondition Begin
+        If (bCondition) Begin
             Send Succeed_Assert of ghoTestApplication 
             Procedure_Return
         End
@@ -38,6 +35,72 @@ Class cDFUnitAssert_Mixin is a Mixin
             Send Fail_Assert of ghoTestApplication asMessages
     End_Procedure
     
+    Procedure AssertPAreEqual Pointer Expected Pointer Actual String sOptAssertMessage
+        If (Expected = Actual) Begin
+            Send Succeed_Assert of ghoTestApplication 
+            Procedure_Return
+        End
+        
+        String[1] asMessages
+        
+        Handle hExpected hActual
+        Move Expected to hExpected
+        Move Actual to hActual
+        
+        Move (SFormat("Should have been [%1] but was [%2]", String(hExpected), String(hActual))) to asMessages[0]
+        If (num_arguments > 2) ;
+            Send Fail_Assert of ghoTestApplication asMessages sOptAssertMessage
+        Else ;
+            Send Fail_Assert of ghoTestApplication asMessages
+    End_Procedure
+    
+    Procedure AssertHAreEqual Handle Expected Handle Actual String sOptAssertMessage
+        If (Expected = Actual) Begin
+            Send Succeed_Assert of ghoTestApplication 
+            Procedure_Return
+        End
+        
+        String[1] asMessages
+        Move (SFormat("Should have been [%1] but was [%2]", String(Expected), String(Actual))) to asMessages[0]
+        If (num_arguments > 2) ;
+            Send Fail_Assert of ghoTestApplication asMessages sOptAssertMessage
+        Else ;
+            Send Fail_Assert of ghoTestApplication asMessages
+    End_Procedure
+    
+    Procedure AssertPNAreEqual Pointer Expected Pointer Actual String sOptAssertMessage
+        If (Expected <> Actual) Begin
+            Send Succeed_Assert of ghoTestApplication 
+            Procedure_Return
+        End
+        
+        String[1] asMessages
+        
+        Handle hExpected hActual
+        Move Expected to hExpected
+        Move Actual to hActual
+        
+        Move (SFormat("Should not have been [%1] but was [%2]", String(hExpected), String(hActual))) to asMessages[0]
+        If (num_arguments > 2) ;
+            Send Fail_Assert of ghoTestApplication asMessages sOptAssertMessage
+        Else ;
+            Send Fail_Assert of ghoTestApplication asMessages
+    End_Procedure
+    
+    Procedure AssertHNAreEqual Handle Expected Handle Actual String sOptAssertMessage
+        If (Expected <> Actual) Begin
+            Send Succeed_Assert of ghoTestApplication 
+            Procedure_Return
+        End
+        
+        String[1] asMessages
+        Move (SFormat("Should have been [%1] but was [%2]", String(Expected), String(Actual))) to asMessages[0]
+        If (num_arguments > 2) ;
+            Send Fail_Assert of ghoTestApplication asMessages sOptAssertMessage
+        Else ;
+            Send Fail_Assert of ghoTestApplication asMessages
+    End_Procedure
+    
     Procedure AssertIAreEqual Integer Expected Integer Actual String sOptAssertMessage
         If (Expected = Actual) Begin
             Send Succeed_Assert of ghoTestApplication 
@@ -46,6 +109,20 @@ Class cDFUnitAssert_Mixin is a Mixin
         
         String[1] asMessages
         Move (SFormat("Should have been [%1] but was [%2]", String(Expected), String(Actual))) to asMessages[0]
+        If (num_arguments > 2) ;
+            Send Fail_Assert of ghoTestApplication asMessages sOptAssertMessage
+        Else ;
+            Send Fail_Assert of ghoTestApplication asMessages
+    End_Procedure
+    
+    Procedure AssertUIAreEqual UInteger Expected UInteger Actual String sOptAssertMessage
+        If (Expected = Actual) Begin
+            Send Succeed_Assert of ghoTestApplication 
+            Procedure_Return
+        End
+        
+        String[1] asMessages
+        Get SFormat "Should have been [%1] but was [%2]" Expected Actual to asMessages[0]
         If (num_arguments > 2) ;
             Send Fail_Assert of ghoTestApplication asMessages sOptAssertMessage
         Else ;
@@ -67,6 +144,20 @@ Class cDFUnitAssert_Mixin is a Mixin
     End_Procedure
     
     Procedure AssertBIAreEqual BigInt Expected BigInt Actual String sOptAssertMessage
+        If (Expected = Actual)  Begin
+            Send Succeed_Assert of ghoTestApplication 
+            Procedure_Return
+        End
+        
+        String[1] asMessages
+        Move (SFormat("Should have been [%1] but was [%2]", String(Expected), String(Actual))) to asMessages[0]
+        If (num_arguments > 2) ;
+            Send Fail_Assert of ghoTestApplication asMessages sOptAssertMessage
+        Else ;
+            Send Fail_Assert of ghoTestApplication asMessages
+    End_Procedure
+    
+    Procedure AssertUBIAreEqual UBigInt Expected UBigInt Actual String sOptAssertMessage
         If (Expected = Actual)  Begin
             Send Succeed_Assert of ghoTestApplication 
             Procedure_Return
@@ -122,6 +213,62 @@ Class cDFUnitAssert_Mixin is a Mixin
             Send Fail_Assert of ghoTestApplication asMessages
     End_Procedure
     
+    Procedure AssertDNAreEqual Decimal Expected Decimal Actual String sOptAssertMessage
+        If (Expected = Actual)  Begin
+            Send Succeed_Assert of ghoTestApplication 
+            Procedure_Return
+        End
+        
+        String[1] asMessages
+        Get SFormat "Should have been [%1] but was [%2]" Expected Actual to asMessages[0]
+        If (num_arguments > 2) ;
+            Send Fail_Assert of ghoTestApplication asMessages sOptAssertMessage
+        Else ;
+            Send Fail_Assert of ghoTestApplication asMessages
+    End_Procedure
+    
+    Procedure AssertDNAreNotEqual Decimal Expected Decimal Actual String sOptAssertMessage
+        If (Expected <> Actual)  Begin
+            Send Succeed_Assert of ghoTestApplication 
+            Procedure_Return
+        End
+        
+        String[1] asMessages
+        Get SFormat "Should not have been [%1] but was [%2]" Expected Actual to asMessages[0]
+        If (num_arguments > 2) ;
+            Send Fail_Assert of ghoTestApplication asMessages sOptAssertMessage
+        Else ;
+            Send Fail_Assert of ghoTestApplication asMessages
+    End_Procedure
+    
+    Procedure AssertRAreEqual Real Expected Real Actual String sOptAssertMessage
+        If (Expected = Actual)  Begin
+            Send Succeed_Assert of ghoTestApplication 
+            Procedure_Return
+        End
+        
+        String[1] asMessages
+        Get SFormat "Should have been [%1] but was [%2]" Expected Actual to asMessages[0]
+        If (num_arguments > 2) ;
+            Send Fail_Assert of ghoTestApplication asMessages sOptAssertMessage
+        Else ;
+            Send Fail_Assert of ghoTestApplication asMessages
+    End_Procedure
+    
+    Procedure AssertRAreNotEqual Real Expected Real Actual String sOptAssertMessage
+        If (Expected <> Actual)  Begin
+            Send Succeed_Assert of ghoTestApplication 
+            Procedure_Return
+        End
+        
+        String[1] asMessages
+        Get SFormat "Should not have been [%1] but was [%2]" Expected Actual to asMessages[0]
+        If (num_arguments > 2) ;
+            Send Fail_Assert of ghoTestApplication asMessages sOptAssertMessage
+        Else ;
+            Send Fail_Assert of ghoTestApplication asMessages
+    End_Procedure
+    
     Procedure AssertSAreEqual String Expected String Actual String sOptAssertMessage
         If (Expected = Actual and Length(Expected) = Length(Actual)) Begin
             Send Succeed_Assert of ghoTestApplication 
@@ -129,7 +276,7 @@ Class cDFUnitAssert_Mixin is a Mixin
         End
         
         String[1] asMessages
-        Move (SFormat("Should have been ['%1'] but was ['%2']", Expected, Actual)) to asMessages[0]
+        Move (SFormat("Should have been ['%1'] (%3) but was ['%2'] (%4)", Expected, Actual, Length(Expected), Length(Actual) )) to asMessages[0]
         If (num_arguments > 2) ;
             Send Fail_Assert of ghoTestApplication asMessages sOptAssertMessage
         Else ;
@@ -143,7 +290,7 @@ Class cDFUnitAssert_Mixin is a Mixin
         End
         
         String[1] asMessages
-        Move (SFormat("Should not have been ['%1'] but was ['%2']", Expected, Actual)) to asMessages[0]
+        Move (SFormat("Should not have been ['%1'](%3) but was ['%2'](%4)", Expected, Actual, Length(Expected), Length(Actual))) to asMessages[0]
         If (num_arguments > 2) ;
             Send Fail_Assert of ghoTestApplication asMessages sOptAssertMessage
         Else ;
@@ -166,6 +313,34 @@ Class cDFUnitAssert_Mixin is a Mixin
 
     Procedure AssertDAreNotEqual Date Expected Date Actual String sOptAssertMessage
         If (Expected <> Actual)  Begin
+            Send Succeed_Assert of ghoTestApplication 
+            Procedure_Return
+        End
+        
+        String[1] asMessages
+        Move (SFormat("Should not have been [%1] but was [%2]", String(Expected), String(Actual))) to asMessages[0]
+        If (num_arguments > 2) ;
+            Send Fail_Assert of ghoTestApplication asMessages sOptAssertMessage
+        Else ;
+            Send Fail_Assert of ghoTestApplication asMessages
+    End_Procedure
+    
+    Procedure AssertTAreEqual Time Expected Time Actual String sOptAssertMessage
+        If (Expected = Actual) Begin
+            Send Succeed_Assert of ghoTestApplication 
+            Procedure_Return
+        End
+        
+        String[1] asMessages
+        Move (SFormat("Should have been [%1] but was [%2]", String(Expected), String(Actual))) to asMessages[0]
+        If (num_arguments > 2) ;
+            Send Fail_Assert of ghoTestApplication asMessages sOptAssertMessage
+        Else ;
+            Send Fail_Assert of ghoTestApplication asMessages
+    End_Procedure
+    
+    Procedure AssertTAreNotEqual Time Expected Time Actual String sOptAssertMessage
+        If (Expected <> Actual) Begin
             Send Succeed_Assert of ghoTestApplication 
             Procedure_Return
         End
@@ -228,6 +403,20 @@ Class cDFUnitAssert_Mixin is a Mixin
         
         String[1] asMessages
         Move (SFormat("Should not have been [%1] but was [%2]", String(Expected), String(Actual))) to asMessages[0]
+        If (num_arguments > 2) ;
+            Send Fail_Assert of ghoTestApplication asMessages sOptAssertMessage
+        Else ;
+            Send Fail_Assert of ghoTestApplication asMessages
+    End_Procedure
+    
+    Procedure AssertTSAreLess TimeSpan More TimeSpan Less String sOptAssertMessage
+        If (More <> Less) Begin
+            Send Succeed_Assert of ghoTestApplication 
+            Procedure_Return
+        End
+        
+        String[1] asMessages
+        Move (SFormat("[%1] should have been less than [%2]", String(More), String(Less))) to asMessages[0]
         If (num_arguments > 2) ;
             Send Fail_Assert of ghoTestApplication asMessages sOptAssertMessage
         Else ;

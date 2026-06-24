@@ -1,4 +1,4 @@
-Use cRichEdit.pkg
+﻿Use cRichEdit.pkg
 
 Use DFUnit\Reporting\LineBasedReporting.pkg
 
@@ -50,7 +50,7 @@ Class cDFUnitUIListInmediateReporter is a cRichEdit
     Procedure Line
         If (pbNewLine(Self) = False) ;
             Send PrintLn ""
-        Send AppendTextLn (psLine(Self))
+        Send AppendTextLn C_DFUNIT_LINEBASED_LINE
     End_Procedure
     
 End_Class
@@ -123,7 +123,7 @@ Class cDFUnitUIListReporter is a cDFUnitUIListInmediateReporter
         
         String[] aMessages
         Get paMessages to aMessages
-        Move (psLine(Self)) to aMessages[SizeOfArray(aMessages) - 1]
+        Move C_DFUNIT_LINEBASED_LINE to aMessages[SizeOfArray(aMessages) - 1]
         Move "" to aMessages[SizeOfArray(aMessages)]
         Set paMessages to aMessages
     End_Procedure

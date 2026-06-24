@@ -1,14 +1,15 @@
-Use VdfBase.pkg
-Use gFormatNumbers.pkg
-
-Use DFUnit\Testing\Test.pkg
+﻿Use DFUnit\Testing\Test.pkg
 Use DFUnit\Testing\TestRunner.pkg
 Use DFUnit\Fixturing\Fixture.pkg
 Use DFUnit\Results\StatisticsCollector.pkg
 
 Use DFUnit\Reporting\ReporterInterface.pkg
 
-Use RGB.pkg
+Use DFUnit\Version.pkg
+
+Use System\Compat\Rgb.pkg
+
+Define C_DFUNIT_LINEBASED_LINE for "==============================================================================="
 
 Class cDFUnitLineBasedReporter_Mixin is a Mixin
     
@@ -19,30 +20,32 @@ Class cDFUnitLineBasedReporter_Mixin is a Mixin
         { Visibility=Private }
         Property Boolean pbNewLine True
         { Visibility=Private }
-        Property String psLine "----------------------------------------------------------------------"
+        Property Boolean pbFirstFail True
         
         { Visibility=Private }
-        Property Integer piIndentationIncrease 4
+        Property Integer piIndentationIncrease 2
+    End_Procedure
+    
+    Procedure Start Handle hEnv
+        If (SizeOfString(DFUNIT_SUB_VERSION)) Begin
+            Send PrintLn (SFormat('[DFUnit] DFUnit version is "%1-%2"', DFUNIT_VERSION, DFUNIT_SUB_VERSION))
+        End
+        Else Begin
+            Send PrintLn (SFormat('[DFUnit] DFUnit version is "%1"', DFUNIT_VERSION))
+        End
+        Send PrintLn (SFormat('[DFUnit] run with "--help" for options'))
+      
+        Send Line
     End_Procedure
     
     Procedure StartFixture Handle hEnv
-        Handle hFixture
-        Get Current_Fixture of hEnv to hFixture
-        
-        Send IncreaseScope
-        Send PrintLn (FixtureName(hFixture))
     End_Procedure
     
     Procedure EndFixture Handle hEnv
-        Send DecreaseScope
     End_Procedure
     
     Procedure StartTest Handle hEnv
-        Handle hTest
-        Get Current_Test of hEnv to hTest
-        
-        Send IncreaseScope
-        Send Print (TestName(hTest))
+        Set pbFirstFail to True
     End_Procedure
     
     Procedure Set Color Integer iColor
@@ -53,7 +56,10 @@ Class cDFUnitLineBasedReporter_Mixin is a Mixin
         Get Current_Test of hEnv to hTest
         
         Set Color to clRed
-        Send PrintLn (" [Failed]")
+        If (pbFirstFail(Self)) Begin
+            Send PrintLn (SFormat("[DFUnit] [%1] failed", FullTestName(hTest)))
+            Set pbFirstFail to False
+        End
         
         Send IncreaseScope
         Send PrintLn (SFormat("Assertion Failed: '%1'.", sAssertMessage))
@@ -74,7 +80,10 @@ Class cDFUnitLineBasedReporter_Mixin is a Mixin
         Get Current_Test of hEnv to hTest
         
         Set Color to clRed
-        Send PrintLn (" [Failed]")
+        If (pbFirstFail(Self)) Begin
+            Send PrintLn (SFormat("[DFUnit] [%1] failed", FullTestName(hTest)))
+            Set pbFirstFail to False
+        End
         
         Send IncreaseScope
         
@@ -103,7 +112,7 @@ Class cDFUnitLineBasedReporter_Mixin is a Mixin
         Send PrintLn ("'" + oError.sErrText + "'.")
         Send DecreaseScope
         
-        Send PrintLn "CallStack:"
+        Send PrintLn "Callstack:"
         Send IncreaseScope
         
         Move (Replaces("\n", oError.sCallStack, Character(10) + sIndentation)) to oError.sCallStack
@@ -118,30 +127,27 @@ Class cDFUnitLineBasedReporter_Mixin is a Mixin
     End_Procedure
     
     Procedure EndTest Handle hEnv
-        Handle hTest
-        Get Current_Test of hEnv to hTest
         
-        If (Current_Test_Succeeded(hEnv)) Begin
-            Send PrintLn (" [Ok]")
-        End
-        Send DecreaseScope
     End_Procedure
     
     Procedure Finish Handle hEnv
-        String sTotalAssertions
-        Move (String(TotalAssertions(hEnv))) to sTotalAssertions
+        If (TestsSucceeded(hEnv)) Begin
+            Send PrintLn "[DFUnit] Nothing to report."
+        End
         
         Send Line
-        Send PrintLn (SFormat("Assertions: %1/%2", TotalSucceededAssertions(hEnv), sTotalAssertions))
-        Send PrintLn (SFormat("Tests: %1/%2", TotalSucceededTests(hEnv), TotalTests(hEnv)))
-        Send PrintLn (SFormat("Errors: %1", TotalErrors(hEnv)))
+        Send PrintLn (SFormat("[DFUnit] test cases: %1 | %2 passed | %3 failed", TotalTests(hEnv), TotalSucceededTests(hEnv), TotalFailedTests(hEnv)))
+        Send PrintLn (SFormat("[DFUnit] assertions: %1 | %2 passed | %3 failed", TotalAssertions(hEnv), TotalSucceededAssertions(hEnv), TotalFailedAssertions(hEnv)))
+        If (TotalFailedTests(hEnv) > 0) Begin
+            Send PrintLn (SFormat("[DFUnit] errors occured: %1", TotalErrors(hEnv)))
+        End
         Send Line
         If (TestsSucceeded(hEnv)) Begin
             Set Color to clLime
-            Send PrintLn "Tests: Succeeded"
+            Send PrintLn "[DFUnit] Status: SUCCESS!"
         End
         Else Begin
-            Send PrintLn "Tests: Failed"
+            Send PrintLn "[DFUnit] Status: FAILED!"
         End
     End_Procedure
     

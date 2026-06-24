@@ -1,12 +1,10 @@
 ﻿Use DFUnit\Globals.pkg
 Use DFUnit\Testing\Assert.pkg
-Use DFUnit\Testing\AssertArray.pkg
 
 Use DFUnit\Utils\Objects.pkg
 
 Class cDFUnitTest is a cObject
     Import_Class_Protocol cDFUnitAssert_Mixin
-    Import_Class_Protocol cDFUnitAssertArray_Mixin
     
     Procedure Construct_Object
         Property String psTestName
@@ -22,11 +20,21 @@ Class cDFUnitTest is a cObject
     Function TestName Returns String
         String sTestName
         Get psTestName to sTestName
-        If (Length(sTestName) <> 0) Begin
-            Function_Return sTestName
+        If (SizeOfString(sTestName) = 0) Begin
+            Get Object_Label to sTestName
+        End
+        Function_Return sTestName
+    End_Function
+    
+    { Visibility=Private }
+    Function FullTestName Returns String
+        String sPrev
+        Delegate Get FullFixtureName to sPrev
+        If (SizeOfString(sPrev)) Begin
+            Function_Return (sPrev + "." + (TestName(Self)))
         End
         Else Begin
-            Function_Return (Object_Label(Self))
+            Function_Return (TestName(Self))
         End
     End_Function
     

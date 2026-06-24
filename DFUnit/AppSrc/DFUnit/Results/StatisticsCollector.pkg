@@ -1,4 +1,4 @@
-Use VDFBase.pkg
+﻿Use DFUnit\Platform.pkg
 
 Class cDFUnitStatisticsCollector_Mixin is a Mixin
     

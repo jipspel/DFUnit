@@ -1,20 +1,25 @@
 ﻿Use UI
 
+{ Visibility=Private }
+Function DFUnit_GetObjectNameWithNoParent Global Handle hObject Returns String
+    String sName
+    Integer iPos
+    
+    Get Name of hObject to sName
+    Move (Pos(".", sName)) to iPos
+    While (iPos > 0)
+        Move (Mid(sName, Length(sName) - iPos, iPos + 1)) to sName
+        Move (Pos(".", sName)) to iPos
+    Loop
+    
+    Function_Return sName
+End_Function    
+
 {Visibility=Private}
 Function DFUnit_NullableNameOfObject Global Handle hObject Returns String
     String sObjectName
-    Boolean bIsTrapped
     
-    Move "Invalid" to sObjectName
-    
-    Get IsTrapped of Error_Object_id 69 to bIsTrapped
-    If (bIsTrapped) Begin
-        Send Ignore_Error of Error_Object_id 69
-    End
-    Get Object_Label of hObject to sObjectName
-    If (bIsTrapped) Begin
-        Send Trap_Error of Error_Object_id 69
-    End
+    Get Name of hObject to sObjectName
     
     Function_Return sObjectName
 End_Function

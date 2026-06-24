@@ -1,4 +1,4 @@
-Use VDFBase.pkg
+﻿Use DFUnit\Platform.pkg
 
 Class cDFUnitFixtureCollector_Mixin is a Mixin
     

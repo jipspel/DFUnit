@@ -1,0 +1,83 @@
+﻿
+
+#IFNDEF IS$DFCLASSIC
+
+#COMMAND Exit_Application R .
+  Move !1 to |VI109
+  !A [] $040 !1
+#ENDCOMMAND
+
+#ELSE
+
+{ Visibility=Private }
+External_Function DFUnit_WinAPI_ExitProcess "ExitProcess" Kernel32.dll Integer iExitCode Returns Integer
+
+{ Visibility=Private }
+External_Function DFUnit_WinAPI_WriteConsole "WriteConsoleW" Kernel32.dll ;
+    Handle hConsole ;
+    Pointer lwpBuffer ;
+    DWord nCharsToWrite ;
+    Pointer lpnCharsWritten ;
+    Pointer lpReserved ;
+    Returns Integer
+
+{ Visibility=Private }
+External_Function DFUnit_WinAPI_AttachConsole "AttachConsole" Kernel32.dll ;
+    Integer dwProcessID ;
+    Returns Integer
+
+{ Visibility=Private }
+External_Function DFUnit_WinAPI_GetStdHandle "GetStdHandle" Kernel32.dll ;
+    Integer nStdHandle ;
+    Returns Integer
+
+{ Visibility=Private }
+Global_Variable Handle ghDFUnitConsoleHandle
+Move (DFUnit_WinAPI_AttachConsole(-1)) to ghDFUnitConsoleHandle // -1 == ATTACH_PARENT_PROCESS
+Move (DFUnit_WinAPI_GetStdHandle(-11)) to ghDFUnitConsoleHandle // -11 == STD_OUTPUT_HANDLE
+
+#ENDIF
+
+
+Procedure DFUnit_ConsoleWait Global Integer iOptExitCode
+    Integer iVoid
+    
+    If (RuntimePlatformId() <> C_RuntimePlaformId_WASM) Begin
+        Inkey iVoid
+    End
+End_Procedure 
+
+Procedure DFUnit_ConsoleExit Global Integer iOptExitCode
+    Integer iVoid
+    
+#IFNDEF IS$DFCLASSIC
+    Exit_Application iOptExitCode
+#ELSE
+    Integer iVoid
+    If (num_arguments > 0) ;
+        Move (DFUnit_WinAPI_ExitProcess(iOptExitCode)) to iVoid
+    Else
+        Move (DFUnit_WinAPI_ExitProcess(0)) to iVoid
+#ENDIF
+End_Procedure
+
+#IFNDEF IS$DFCLASSIC
+{ Visibility=Private }
+Procedure DFUnit_ConsoleWrite Global String sText
+    Show sText
+#ELSE
+{ Visibility=Private }
+Procedure DFUnit_ConsoleWrite Global WString wsText
+    Integer iStatus
+    Move (DFUnit_WinAPI_WriteConsole(ghDFUnitConsoleHandle, AddressOf(wsText), SizeOfWString(wsText), 0, 0)) to iStatus
+#ENDIF
+End_Procedure
+
+{ Visibility=Private }
+Procedure DFUnit_ConsoleWriteLn  Global String sText
+//#IFNDEF IS$DFCLASSIC
+    Showln sText
+//#ELSE
+//    Send DFUnit_ConsoleWrite (sText+(Character(10))+(Character(13)))
+//#ENDIF
+End_Procedure

@@ -1,14 +1,23 @@
-Use cApplication.pkg
-Use Data_Set.pkg
+﻿
 
-Use DFUnit\Version.pkg
+#IFDEF DFUNIT_FLEXSCRIPT
+Use FlexScript.pkg
+#ELSE
+Use cApplication.pkg
+#ENDIF
+
+#IFDEF DFUNIT_ENABLE_GUI
+Use Data_Set.pkg
 Use DFUnit\GUI.pkg
+#ENDIF
+Use DFUnit\Version.pkg
 Use DFUnit\Utils.pkg
 Use DFUnit\Testing.pkg
 Use DFUnit\Fixturing.pkg
 Use DFUnit\Reporting.pkg
 
 Use DFUnit\Results\StatisticsCollector.pkg
+
 
 Class cDFUnitTestApplication is a cDFUnitFixture
     
@@ -37,8 +46,11 @@ Class cDFUnitTestApplication is a cDFUnitFixture
         
         Property Boolean pbAutoRun True
         Property Boolean pbAutoRunTests True
+#IFDEF DFUNIT_ENABLE_GUI
         Property Boolean pbUseUIIfInDebugger True
-        Property Boolean pbUseUI True
+        Property Boolean pbUseUI False
+#ENDIF
+        Property Boolean pbConsoleWait False
     End_Procedure
     
     Procedure End_Construct_Object
@@ -51,6 +63,7 @@ Class cDFUnitTestApplication is a cDFUnitFixture
         Handle hoCommandLine
         Integer iArgCount iIndex
         String sArgument sTemp
+        Handle hoReporter
 
         Get phoCommandLine of ghoApplication to hoCommandLine
         Get CountOfArgs of hoCommandLine to iArgCount
@@ -58,6 +71,14 @@ Class cDFUnitTestApplication is a cDFUnitFixture
         For iIndex from 0 to (iArgCount - 1)
             Move (Argument(hoCommandLine, iIndex)) to sArgument
             Case Begin
+#IFDEF DFUNIT_ENABLE_GUI
+                Case (sArgument = "-c" or sArgument = "--console")
+                    Set pbUseUI to False
+                    Case Break
+                Case (sArgument = "-g" or sArgument = "--gui")
+                    Set pbUseUI to True
+                    Case Break
+#ENDIF
                 Case (sArgument = "-h" or sArgument = "--help")
                     Send DFUnit_ConsoleWriteLn "DFUnit - DataFlex Unit Testing Framework"
                     Send DFUnit_ConsoleWrite "Version: "
@@ -66,63 +87,64 @@ Class cDFUnitTestApplication is a cDFUnitFixture
                     Send DFUnit_ConsoleWriteLn DFUNIT_SUB_VERSION
                     Send DFUnit_ConsoleExit 0
                     Case Break
-                Case (sArgument = "-c" or sArgument = "--console")
-                    Set pbUseUI to False
-                    Case Break
-                Case (sArgument = "-g" or sArgument = "--gui")
-                    Set pbUseUI to True
-                    Case Break
                 Case (sArgument = "-n" or sArgument = "--no-autorun")
                     Set pbAutoRunTests to False
                     Case Break
-                Case (sArgument = "-o" or sArgument = "--output")
+                Case (sArgument = "--junit")                    
+                    Get Create (RefClass(cDFUnitJunitReporter)) to hoReporter
+                    Send AddReporterByName "junit" hoReporter
+                    Case Break
+                Case (sArgument = "--junit-file")
                     If (iArgCount - iIndex <= 0) Begin
                         Send DFUnit_ConsoleWriteLn "No outputfile has been specified."
                         Send DFUnit_ConsoleExit -1
                     End
                     
-                    String sAbsolutePath
-                    
                     Increment iIndex
                     Move (Argument(hoCommandLine, iIndex)) to sArgument
-                    If (not(DFUnit_AbsolutPath(sArgument, (&sAbsolutePath)))) Begin
-                        Send DFUnit_ConsoleWriteLn "Invalid outputname."
-                        Send DFUnit_ConsoleExit -1
-                    End
                     
-                    Object oXMLReporter is a cDFUnitXMLReporter
-                        Set psFileName to sAbsolutePath
-                    End_Object
-                    Send AddReporter oXMLReporter
+                    Get Create (RefClass(cDFUnitConsoleReporter)) to hoReporter
+                    Send AddReporterByName "console" hoReporter
+                    Get Create (RefClass(cDFUnitJunitReporter)) to hoReporter
+                    Set psOutputFileName of hoReporter to sArgument
+                    Send AddReporterByName "junit-file" hoReporter
                     Case Break
             Case End
         Loop
     End_Procedure
     
     Procedure AutoRun
-        Boolean bUseUI
         Send ParseEnvironmentFromCommandLine
         
+#IFDEF DFUNIT_ENABLE_GUI
+        Boolean bUseUI
         Get pbUseUI to bUseUI
         
         If (bUseUI or (IsDebuggerPresent() and pbUseUIIfInDebugger(Self))) Begin
             Object oUIApplication is a cDFUnitUIPanel
             End_Object
             Start_UI
+            Procedure_Return
+        End
+#ENDIF
+        
+        Integer iExitCode
+        If (ReporterCount(Self) = 0) Begin
+            Handle hoReporter
+            Get Create (RefClass(cDFUnitConsoleReporter)) to hoReporter
+            Send AddReporterByName "console" hoReporter
+        End
+        Send ManualRunTests
+        
+        If (pbConsoleWait(Self)) Begin
+            Send DFUnit_ConsoleWait
+        End
+        
+        If (TestsSucceeded(Self)) Begin
+            Send DFUnit_ConsoleExit 0
         End
         Else Begin
-            Integer iExitCode
-            Object oConsoleReporter is a cDFUnitConsoleReporter
-            End_Object
-            Send AddReporter oConsoleReporter
-            Send ManualRunTests
-            
-            If (TestsSucceeded(Self)) Begin
-                Send DFUnit_ConsoleExit 0
-            End
-            Else Begin
-                Send DFUnit_ConsoleExit -1
-            End
+            Send DFUnit_ConsoleExit -1
         End
     End_Procedure
     
@@ -138,6 +160,10 @@ Class cDFUnitTestApplication is a cDFUnitFixture
     
     // Overrides for the cDFUnitFixture /////////////////////////////
     
+    Function FullFixtureName Returns String
+        Function_Return ""
+    End_Function
+    
     { Visibility=Private }
     Procedure SetupFixture
         Send BeforeSetup
@@ -152,4 +178,10 @@ Class cDFUnitTestApplication is a cDFUnitFixture
         Send AfterTearDown
     End_Procedure
 
+End_Class
+
+
+
+{ ComponentType=WebAppAjaxClass }
+Class cWebDfUnitTestApplication is a cDFUnitTestApplication
 End_Class
